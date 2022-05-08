@@ -6,12 +6,15 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.stream.Stream;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AccountsTest {
     // given:
-    private Account account1 = new SavingAccount(1, 22000);
-    private Account account2 = new CreditAccount(2);
-    private Account account3 = new CheckingAccount(3, 10000);
+    final private Account account1 = new SavingAccount(1, 22000);
+    final private Account account2 = new CreditAccount(2);
+    final private Account account3 = new CheckingAccount(3, 10000);
+    final private Account account4 = null;
 
     @BeforeAll
     public void beforeAll() {
@@ -51,6 +54,23 @@ public class AccountsTest {
     }
 
     @ParameterizedTest
-    @MethodSource
-    public void test
+    @MethodSource("methodSource")
+    public void testTransfer(Account account, int amount) {
+        // then:
+        Assertions.assertDoesNotThrow(() -> account3.transfer(account, amount));
+    }
+
+    public Stream<Arguments> methodSource() {
+        return Stream.of(
+                Arguments.of(account1, 4500),
+                Arguments.of(account1, -2597),
+                Arguments.of(account1, 4000000),
+                Arguments.of(account2, 4500),
+                Arguments.of(account2, 4000000),
+                Arguments.of(account2, -2597),
+                Arguments.of(account4, 4500),
+                Arguments.of(account4, 4000000),
+                Arguments.of(account4, -2597)
+        );
+    }
 }
