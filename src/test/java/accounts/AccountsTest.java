@@ -41,7 +41,7 @@ public class AccountsTest {
     @Test
     public void testPayBooleanChecking() {
         // given:
-        int amount1 = 400000;
+        int amount1 = 500000;
         int amount2 = 4500;
 
         // when:
