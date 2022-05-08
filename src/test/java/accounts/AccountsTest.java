@@ -6,16 +6,22 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
+
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AccountsTest {
     // given:
     final private Account account1 = new SavingAccount(1, 22000);
     final private Account account2 = new CreditAccount(2);
-    final private Account account3 = new CheckingAccount(3, 10000);
-    final private Account account4 = null;
-
+    final private Account account3 = new CheckingAccount(3, 20000);
+    final private List<Boolean> results = new ArrayList<>();
     @BeforeAll
     public void beforeAll() {
         account2.pay(100000);
@@ -28,36 +34,46 @@ public class AccountsTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1000, 2000, 3000, 4000})
-    public void testTransferBooleanChecking(int amount) {
+    public void testTransfer(int amount) {
         // when:
-        boolean res1 = account3.transferBoolean(account1, amount);
-        boolean res2 = account3.transferBoolean(account2, amount);
+        results.add(account1.transferBoolean(account2, amount));
+        results.add(account1.transferBoolean(account3, amount));
+        results.add(account2.transferBoolean(account1, amount));
+        results.add(account2.transferBoolean(account3, amount));
+        results.add(account3.transferBoolean(account1, amount));
+        results.add(account3.transferBoolean(account2, amount));
 
         // then:
-        Assertions.assertTrue(res1);
-        Assertions.assertTrue(res2);
+        for (Boolean item : results) {
+            assertThat(item, is(true));
+        }
     }
 
     @Test
-    public void testPayBooleanChecking() {
+    public void testPayBoolean() {
         // given:
         int amount1 = 4000000;
         int amount2 = 4500;
 
         // when:
-        boolean res1 = account3.payBoolean(amount1);
-        boolean res2 = account3.payBoolean(amount2);
+        results.add(!account1.payBoolean(amount1));
+        results.add(!account1.payBoolean(amount2));
+        results.add(account2.payBoolean(amount1));
+        results.add(account2.payBoolean(amount2));
+        results.add(!account3.payBoolean(amount1));
+        results.add(account3.payBoolean(amount2));
 
         // then:
-        Assertions.assertFalse(res1);
-        Assertions.assertTrue(res2);
+        for (Boolean item : results) {
+            assertThat(item, is(true));
+        }
     }
 
     @ParameterizedTest
     @MethodSource("methodSource")
     public void testTransfer(Account account, int amount) {
-        // then:
-        Assertions.assertDoesNotThrow(() -> account3.transfer(account, amount));
+        //then
+        assertThatCode(() -> account3.transfer(account, amount)).doesNotThrowAnyException();
     }
 
     public Stream<Arguments> methodSource() {
@@ -67,10 +83,7 @@ public class AccountsTest {
                 Arguments.of(account1, 4000000),
                 Arguments.of(account2, 4500),
                 Arguments.of(account2, 4000000),
-                Arguments.of(account2, -2597),
-                Arguments.of(account4, 4500),
-                Arguments.of(account4, 4000000),
-                Arguments.of(account4, -2597)
+                Arguments.of(account2, -2597)
         );
     }
 }
