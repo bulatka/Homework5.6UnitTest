@@ -16,12 +16,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class AccountsTest {
+public class AccountTest {
     // given:
     final private Account account1 = new SavingAccount(1, 22000);
     final private Account account2 = new CreditAccount(2);
     final private Account account3 = new CheckingAccount(3, 20000);
     final private List<Boolean> results = new ArrayList<>();
+
     @BeforeAll
     public void beforeAll() {
         account2.pay(100000);
@@ -42,26 +43,6 @@ public class AccountsTest {
         results.add(account2.transferBoolean(account3, amount));
         results.add(account3.transferBoolean(account1, amount));
         results.add(account3.transferBoolean(account2, amount));
-
-        // then:
-        for (Boolean item : results) {
-            assertThat(item, is(true));
-        }
-    }
-
-    @Test
-    public void testPayBoolean() {
-        // given:
-        int amount1 = 4000000;
-        int amount2 = 4500;
-
-        // when:
-        results.add(!account1.payBoolean(amount1));
-        results.add(!account1.payBoolean(amount2));
-        results.add(account2.payBoolean(amount1));
-        results.add(account2.payBoolean(amount2));
-        results.add(!account3.payBoolean(amount1));
-        results.add(account3.payBoolean(amount2));
 
         // then:
         for (Boolean item : results) {
